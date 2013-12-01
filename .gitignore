@@ -17,6 +17,6 @@
 *.out
 *.app
 
-*.ncb
+//*.ncb
 
 Core\TradeSys\Debug\
