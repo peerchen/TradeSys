@@ -176,6 +176,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DataInterface.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\MarketPrice.cpp"
 				>
 			</File>
@@ -211,6 +215,14 @@
 			>
 			<File
 				RelativePath=".\ConfigFile.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DataInterface.h"
+				>
+			</File>
+			<File
+				RelativePath=".\DataType.h"
 				>
 			</File>
 			<File
