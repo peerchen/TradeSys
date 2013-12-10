@@ -10,7 +10,10 @@ struct day_data_type
 
 struct data_type
 {
-	int tm;
+	unsigned long long tm;
+
+
+
 };
 
 #endif
