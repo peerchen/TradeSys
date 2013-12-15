@@ -1,6 +1,7 @@
 #pragma once
 #include "API\ThostFtdcMdApi.h"
 
+#include "DataInterface.h"
 #include <vector>
 #include <string>
 
@@ -42,12 +43,16 @@ public:
 
 	void setconfig(const char * addr,const char * Broker,const char * user,const char * passwd, std::vector<std::string> IDs);
 
+	void setDataInterface(DataInterface * db);
 	void StartToGetData();
+
 
 private:
 	void ReqUserLogin();
 	void SubscribeMarketData();
 	bool IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo);
+
+
 
 
 	// ≈‰÷√≤Œ ˝
@@ -60,6 +65,7 @@ private:
 	int iRequestID;
 
 	CThostFtdcMdApi* pUserApi;
+	DataInterface * pDb;
 };
 
 

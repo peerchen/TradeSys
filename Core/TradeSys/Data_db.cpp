@@ -104,3 +104,4 @@ int DataDB::loop_db(int (*pFun)(void *ptr, void * db_data, int length), void * p
 
 	return 1;
 }
+

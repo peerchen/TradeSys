@@ -1,5 +1,6 @@
 #include "MarketPrice.h"
 #include <iostream>
+#include <time.h>
 using namespace std;
 
 #pragma warning(disable : 4996)
@@ -91,21 +92,75 @@ void MarketPrice::OnRspUnSubMarketData(CThostFtdcSpecificInstrumentField *pSpeci
 	cerr << __FUNCTION__ << endl;
 }
 
-void MarketPrice::OnRtnDepthMarketData(CThostFtdcDepthMarketDataField *pDepthMarketData)
+
+
+static unsigned long long time_convert(int year, int month, int day, int hour, int min, int sec, int micro_sec)
+{
+	struct tm timein;
+	timein.tm_year = year;
+	timein.tm_mon = month-1;
+	timein.tm_mday = day-1;
+	timein.tm_hour = hour-1;
+	timein.tm_min = min;
+	timein.tm_sec = sec;
+	time_t tm = mktime(&timein);
+
+	//time_t tm = time(NULL);
+
+	return (unsigned long long)tm*1000+micro_sec;
+}
+
+void MarketPrice::OnRtnDepthMarketData(CThostFtdcDepthMarketDataField *data)
 {
 	cerr << __FUNCTION__ << endl;
 
-	static FILE * pflog=fopen("data.log" ,"a+"); 
+	//static FILE * pflog=fopen("data.log" ,"a+");
 
-	fwrite( (void * ) pDepthMarketData, sizeof(CThostFtdcDepthMarketDataField), 1 , pflog); 
+	//fwrite( (void * ) pDepthMarketData, sizeof(CThostFtdcDepthMarketDataField), 1 , pflog); 
 	
 
 
+	int allday = atoi(data->TradingDay);
+	int hour ;
+	int min;
+	int sec;
+
+	struct data_type mydata;
+
+	sscanf(data->UpdateTime, "%d:%d:%d", &hour, &min, &sec);
+
+	unsigned long long tm =time_convert(allday/10000 - 1900, (allday%10000)/100, allday%100, hour, min, sec, data->UpdateMillisec);
+
+	mydata.version = 0x1;
+	mydata.ask_price[0] = data->AskPrice1;
+	mydata.ask_volume[0] = data->AskVolume1;
+	mydata.bid_price[0] = data->BidPrice1;
+	mydata.bid_volume[0] = data->BidVolume1;
+
+	mydata.last_Price = data->LastPrice;
+	mydata.SettlementPrice = data->SettlementPrice;
+	mydata.turnover = data->Turnover;
+	mydata.volume = data->Volume;
+
+	mydata.average_price = data->AveragePrice;
+	mydata.ClosePrice = data->ClosePrice;
+	mydata.CurrDelta = data->CurrDelta;
+	mydata.HighestPrice = data->HighestPrice;
+	mydata.LowestPrice = data->LastPrice;
+	strcpy(mydata.IDs, data->InstrumentID);
+	mydata.PreDelta = data->PreDelta;
+	mydata.tm = tm;
+
+	mydata.OpenPrice = data->OpenPrice;
+
+	pDb->PutData(data->InstrumentID, 0, tm , mydata );
+/*
 	cerr << pDepthMarketData->TradingDay << " " << pDepthMarketData->InstrumentID << " "
 		<< pDepthMarketData->ExchangeID << " " << pDepthMarketData->ExchangeInstID << " " 
 		<< pDepthMarketData->LastPrice << " " << pDepthMarketData->PreSettlementPrice<< " "
 		<< pDepthMarketData->PreClosePrice << " " << pDepthMarketData->OpenInterest<< " "
 		<< pDepthMarketData->AskVolume1 << " " << pDepthMarketData->BidVolume1<< endl;
+		*/
 }
 
 bool MarketPrice::IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo)
@@ -118,6 +173,12 @@ bool MarketPrice::IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo)
 }
 
 
+void MarketPrice::setDataInterface(DataInterface * db)
+{
+	pDb = db;
+
+	return;
+}
 #if 0
 CThostFtdcMdApi* pUserApi;
 

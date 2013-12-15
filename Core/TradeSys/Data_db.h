@@ -18,8 +18,9 @@ public:
 
 	int loop_db(int (*pFun)(void *ptr, void * db_data, int length), void * p);
 
+	leveldb::DB* db;
 private:
-		leveldb::DB* db;
+		
 };
 
 
