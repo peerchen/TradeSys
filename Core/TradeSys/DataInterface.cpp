@@ -49,6 +49,45 @@ int DataInterface::GetData(char * Instrument, int  InstrumentNum, unsigned long 
 
 	return 1;
 }
+
+int DataInterface::GetData_range(char * Instrument, int InstrumentNum, unsigned long long  start_tm , unsigned long long  end_tm, struct rang_data_type * data)
+{
+	std::vector<struct data_type> data_in;
+	GetData(Instrument, InstrumentNum, start_tm, end_tm, data_in);
+
+	if(data_in.size() > 0)
+	{
+		int i;
+		data->open_price = data_in[0].last_Price;
+		data->close_price = data_in[data_in.size() -1].last_Price;
+
+		data->high = data_in[0].last_Price;
+		data->low = data_in[0].last_Price;
+		data->volume = 0;
+
+		for(i = 0 ; i < data_in.size(); i++)
+		{
+			data->volume += data_in[i].volume;
+
+			if(data_in[i].last_Price > data->high)
+			{
+				data->high = data_in[i].last_Price;
+			}
+
+			if(data_in[i].last_Price < data->low)
+			{
+				data->low = data_in[i].LowestPrice;
+			}
+		}
+
+		return 1;
+	}
+
+	data->high = 0;
+
+	return -1;
+}
+
 int DataInterface::PutData(char * Instrument, int InstrumentNum, unsigned long long tm, const struct data_type & data)
 {
 	char key[256];

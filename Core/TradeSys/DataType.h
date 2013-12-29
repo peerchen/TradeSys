@@ -9,6 +9,17 @@ struct day_data_type
 };
 
 
+struct rang_data_type
+{
+	double high;
+	double low;
+	double open_price;
+	double close_price;
+
+	int volume;
+};
+
+
 struct data_type
 {
 	unsigned int version; //the version of this data type

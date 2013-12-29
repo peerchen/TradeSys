@@ -11,6 +11,7 @@ public:
 	DataInterface();
 	~DataInterface();
 	int GetData(char * Instrument, int InstrumentNum, unsigned long long  start_tm , unsigned long long  end_tm, std::vector<struct data_type > & data);
+	int GetData_range(char * Instrument, int InstrumentNum, unsigned long long  start_tm , unsigned long long  end_tm, struct rang_data_type * data);
 	int PutData(char * Instrument, int InstrumentNum, unsigned long long  tm, const struct data_type &  data);
 
 //	int Get_current_Data_start(char * Instrument , int InstrumentNum,  unsigned long long  start_tm ,  std::vector<struct data_type> & data_out);
