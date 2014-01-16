@@ -100,14 +100,17 @@ static unsigned long long time_convert(int year, int month, int day, int hour, i
 	timein.tm_year = year;
 	timein.tm_mon = month-1;
 	timein.tm_mday = day-1;
-	timein.tm_hour = hour-1;
+	timein.tm_hour = hour;
 	timein.tm_min = min;
 	timein.tm_sec = sec;
 	time_t tm = mktime(&timein);
 
 	//time_t tm = time(NULL);
-
-	return (unsigned long long)tm*1000+micro_sec;
+	
+	tm = tm*1000;
+	tm += micro_sec;
+	
+	return (unsigned long long)tm;
 }
 
 void MarketPrice::OnRtnDepthMarketData(CThostFtdcDepthMarketDataField *data)
@@ -130,6 +133,8 @@ void MarketPrice::OnRtnDepthMarketData(CThostFtdcDepthMarketDataField *data)
 	sscanf(data->UpdateTime, "%d:%d:%d", &hour, &min, &sec);
 
 	unsigned long long tm =time_convert(allday/10000 - 1900, (allday%10000)/100, allday%100, hour, min, sec, data->UpdateMillisec);
+
+	//printf("%lld\n", tm);
 
 	mydata.version = 0x1;
 	mydata.ask_price[0] = data->AskPrice1;
@@ -154,13 +159,13 @@ void MarketPrice::OnRtnDepthMarketData(CThostFtdcDepthMarketDataField *data)
 	mydata.OpenPrice = data->OpenPrice;
 
 	pDb->PutData(data->InstrumentID, 0, tm , mydata );
-/*
-	cerr << pDepthMarketData->TradingDay << " " << pDepthMarketData->InstrumentID << " "
-		<< pDepthMarketData->ExchangeID << " " << pDepthMarketData->ExchangeInstID << " " 
-		<< pDepthMarketData->LastPrice << " " << pDepthMarketData->PreSettlementPrice<< " "
-		<< pDepthMarketData->PreClosePrice << " " << pDepthMarketData->OpenInterest<< " "
-		<< pDepthMarketData->AskVolume1 << " " << pDepthMarketData->BidVolume1<< endl;
-		*/
+
+	cerr << data->TradingDay << " " << data->InstrumentID << " "
+		<< data->ExchangeID << " " << data->ExchangeInstID << " " 
+		<< data->LastPrice << " " << data->PreSettlementPrice<< " "
+		<< data->PreClosePrice << " " << data->OpenInterest<< " "
+		<< data->AskVolume1 << " " << data->BidVolume1<< " "<< tm<<endl;
+		
 }
 
 bool MarketPrice::IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo)
@@ -211,6 +216,7 @@ int iRequestID = 0;
 void MarketPrice::setconfig(const char * addr,const char * Broker,const char * user,const char * passwd, std::vector<std::string> IDs)
 {
 	strcpy( FRONT_ADDR ,addr );
+	//strcpy( FRONT_ADDR ,"tcp://ctp-cnc1.bjcifco.net:41213 sock5://127.0.0.1:7070");
 	strcpy(BROKER_ID,Broker);
 	strcpy(INVESTOR_ID, user);
 	strcpy(PASSWORD , passwd);
@@ -229,5 +235,10 @@ void MarketPrice::StartToGetData()
 	pUserApi->RegisterFront(FRONT_ADDR);					// connect
 	pUserApi->Init();
 
+		
+}
+
+void MarketPrice::WaitForJoin()
+{
 	pUserApi->Join();
 }

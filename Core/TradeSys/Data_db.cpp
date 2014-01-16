@@ -1,13 +1,19 @@
 
 #include "Data_db.h"
 
+#include <leveldb.h>
 
+
+
+//#pragma comment(lib,"leveldb\\lib\\Release\\leveldb.lib")
 #pragma comment(lib,"leveldb\\lib\\Debug\\leveldb_d.lib")
-
+//#pragma comment(lib,"leveldb\\lib\\ReleaseDll\\leveldb.lib")
 DataDB::DataDB(const char * name)
 {
 	leveldb::Options options;
 	options.create_if_missing = true;
+	options.write_buffer_size = 60 * 1048576;
+	options.max_open_files = 64;
 	leveldb::Status status = leveldb::DB::Open(options, name, &db);
 	assert(status.ok());
 }
@@ -63,8 +69,6 @@ int DataDB::del_data(const void * key_in, int key_size)
 int DataDB::get_data(const void * key, int key_size, std::string & data)
 {
 	leveldb::Status status;
-
-
 
 	leveldb::Slice s_key((char*)key, key_size);
 

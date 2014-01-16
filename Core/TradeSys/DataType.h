@@ -22,14 +22,18 @@ struct rang_data_type
 
 struct data_type
 {
-	unsigned int version; //the version of this data type
-	char IDs[32];
 	unsigned long long tm;
-	
 	double last_Price;//current price
+	double turnover;//should be price*volume
+
+	unsigned int version; //the version of this data type
+	
+	
+	
+	
 	int volume; 
 	
-	double turnover;//should be price*volume
+	
 
 	int open_interest;//hold in hand
 
@@ -60,6 +64,8 @@ struct data_type
 	double	PreDelta;
 	///ΩÒ–È µ∂»
 	double	CurrDelta;
+
+	char IDs[32];
 };
 
 #endif

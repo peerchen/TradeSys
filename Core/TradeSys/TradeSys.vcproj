@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="api/thostmduserapi.lib api/thosttraderapi.lib"
+				AdditionalDependencies="api/thostmduserapi.lib api/thosttraderapi.lib "
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -177,6 +177,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\data_analys_1.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\Data_db.cpp"
 				>
 			</File>
@@ -223,6 +227,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\data_analys_1.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Data_db.h"
 				>
 			</File>
@@ -244,6 +252,10 @@
 			</File>
 			<File
 				RelativePath=".\targetver.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Trade_Util.h"
 				>
 			</File>
 			<Filter

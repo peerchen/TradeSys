@@ -5,6 +5,10 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <time.h>
+#include <leveldb.h>
+#include "Trade_Util.h"
+
 
 using namespace std;
 
@@ -18,9 +22,12 @@ DataInterface::~DataInterface()
 	delete db;
 }
 
+
+
 int DataInterface::GetData(char * Instrument, int  InstrumentNum, unsigned long long start_tm , unsigned long long end_tm, vector<struct data_type > & data_out)
 {
 
+#if 1
 	leveldb::Iterator* it = db->db->NewIterator(leveldb::ReadOptions());
 	if(!it)
 		return 1;
@@ -46,9 +53,11 @@ int DataInterface::GetData(char * Instrument, int  InstrumentNum, unsigned long 
 	}
 		assert(it->status().ok());  // Check for any errors found during the scan
 	delete it;
-
+#endif
 	return 1;
 }
+
+
 
 int DataInterface::GetData_range(char * Instrument, int InstrumentNum, unsigned long long  start_tm , unsigned long long  end_tm, struct rang_data_type * data)
 {
@@ -98,6 +107,44 @@ int DataInterface::PutData(char * Instrument, int InstrumentNum, unsigned long l
 
 	return 1;
 }
+
+
+
+
+SingleInsData::SingleInsData(DataInterface * in, char * Instrument)
+{
+	//struct timeval tv;
+	//gettimeofday( &tv, NULL);
+
+	time_t tm = time(NULL);
+	
+	last_tm = (tm )*1000;
+	Data_hd = in;
+	strcpy(Ins, Instrument);
+
+}
+
+SingleInsData::~SingleInsData()
+{
+
+}
+
+int SingleInsData::GetLastData(std::vector<struct data_type > &data)
+{
+	int ret = Data_hd->GetData(Ins, 0, last_tm , 999999999999999ULL , data);
+	if(data.size() > 0)
+	{
+		last_tm = data[data.size()-1].tm+1;
+		return 1;
+	}
+
+	return 0;
+}
+
+
+
+
+
 
 #if 0
 int DataInterface::Get_current_Data_start(char * Instrument , int InstrumentNum,  unsigned long long  start_tm ,  vector<struct data_type> & data_out)

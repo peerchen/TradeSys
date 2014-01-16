@@ -1,6 +1,7 @@
 // TradeSys.cpp : Defines the entry point for the console application.
 //
 
+
 #include "stdafx.h"
 #include "MarketPrice.h"
 #include "ConfigFile.h"
@@ -8,6 +9,9 @@
 #include "DataInterface.h"
 #include "time.h"
 
+#include "data_analys_1.h"
+#include<iostream>
+#include<windows.h>
 
 static unsigned long long time_convert(int year, int month, int day, int hour, int min, int sec, int micro_sec)
 {
@@ -41,9 +45,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	DataInterface data_interface;
 
 	
-	
-
-
 	config.get_string("Front_Address", addr);
 	config.get_string("Broker_ID", broker);
 	config.get_string("User_name", user);
@@ -55,6 +56,10 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	MP_hd.StartToGetData();
 
+	
+	Data_analys_1(&data_interface);
+
+	MP_hd.WaitForJoin();
 
 	
 	return 0;

@@ -46,6 +46,8 @@ public:
 	void setDataInterface(DataInterface * db);
 	void StartToGetData();
 
+	void WaitForJoin();
+
 
 private:
 	void ReqUserLogin();

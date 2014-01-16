@@ -2,8 +2,8 @@
 #define DATA_DB
 
 #include <string>
-#include <vector>
 #include <leveldb.h>
+
 
 class DataDB
 {
@@ -20,7 +20,7 @@ public:
 
 	leveldb::DB* db;
 private:
-		
+	
 };
 
 
