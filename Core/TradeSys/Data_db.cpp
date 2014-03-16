@@ -4,19 +4,91 @@
 #include <leveldb.h>
 
 
-
-//#pragma comment(lib,"leveldb\\lib\\Release\\leveldb.lib")
+#ifdef NDEBUG
+#pragma comment(lib,"leveldb\\lib\\Release\\leveldb.lib")
+#else
 #pragma comment(lib,"leveldb\\lib\\Debug\\leveldb_d.lib")
+#endif
 //#pragma comment(lib,"leveldb\\lib\\ReleaseDll\\leveldb.lib")
 DataDB::DataDB(const char * name)
 {
+	
 	leveldb::Options options;
+	
+	leveldb_cache_t* cache;
 	options.create_if_missing = true;
-	options.write_buffer_size = 60 * 1048576;
+	options.write_buffer_size = 100000000; //60 * 1048576;
 	options.max_open_files = 64;
+	//options.compression = leveldb::kNoCompression;
+	options.compression = leveldb::kSnappyCompression;
+	
+	//options.block_cache = 64;
+	
+
+	//options.cache = leveldb_cache_create_lru(16*1024*1024);
+	//leveldb::Options options;
+	options.block_cache = leveldb::NewLRUCache(16 * 1048576); 
+
+//	options = leveldb_options_create();
+
+	//leveldb_options_set_cache(options, cache);
+
+	//leveldb_options_set_compression(options, leveldb_no_compression);
+
+
 	leveldb::Status status = leveldb::DB::Open(options, name, &db);
 	assert(status.ok());
 }
+
+int  DataDB::clear_batch()
+{
+	batch.Clear();
+
+	return 1;
+}
+
+int  DataDB::put_batch()
+{
+	leveldb::Status s = db->Write(leveldb::WriteOptions(), &batch);
+
+	if (!s.ok()) 
+	{
+		printf("%s\n",  s.ToString().c_str());
+		printf("batch put error!!!\n");
+	}
+	//std::cerr << s.ToString() << std::endl;
+
+	return 1;
+}
+
+
+int DataDB::insert_data_batch(const void * key, int key_size, const void * data, int size)
+{
+	leveldb::Status status;
+
+	if(NULL == data || size < 0)
+		return -1;
+
+
+	leveldb::Slice s_key((char*)key, key_size);
+	leveldb::Slice value((char*)data, size);
+
+	 batch.Put(s_key, value);
+
+
+#if 0
+	if(status.ok())
+		return 1;
+	else
+	{
+		//	LOG(ERROR)<<status.ToString();
+		printf("add error\n");
+		return 0;
+	}
+#endif
+	return 0;
+}
+
 
 
 int DataDB::insert_data(const void * key, int key_size, const void * data, int size)
@@ -37,7 +109,7 @@ int DataDB::insert_data(const void * key, int key_size, const void * data, int s
 		return 1;
 	else
 	{
-	//	LOG(ERROR)<<status.ToString();
+		printf("%s \n", status.ToString().c_str());
 		printf("add error\n");
 		return 0;
 	}
@@ -80,7 +152,7 @@ int DataDB::get_data(const void * key, int key_size, std::string & data)
 	else
 	{
 		//LOG(ERROR)<<status.ToString();
-		printf("add error\n");
+		//printf("%s\n", status.ToString().c_str());
 		return 0;
 	}
 

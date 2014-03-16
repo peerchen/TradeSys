@@ -1,14 +1,11 @@
 #include "MarketPrice.h"
 #include <iostream>
 #include <time.h>
+#include "Trade_Util.h"
 using namespace std;
 
 #pragma warning(disable : 4996)
-
 // USER_API²ÎÊý
-
-
-
 
 void MarketPrice::OnRspError(CThostFtdcRspInfoField *pRspInfo,
 		int nRequestID, bool bIsLast)
@@ -83,8 +80,6 @@ void MarketPrice::OnRspSubMarketData(CThostFtdcSpecificInstrumentField *pSpecifi
 	cerr << "Res " << pRspInfo->ErrorID << endl;
 	cerr << nRequestID << endl;
 	cerr << bIsLast << endl;
-
-	
 }
 
 void MarketPrice::OnRspUnSubMarketData(CThostFtdcSpecificInstrumentField *pSpecificInstrument, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
@@ -94,24 +89,7 @@ void MarketPrice::OnRspUnSubMarketData(CThostFtdcSpecificInstrumentField *pSpeci
 
 
 
-static unsigned long long time_convert(int year, int month, int day, int hour, int min, int sec, int micro_sec)
-{
-	struct tm timein;
-	timein.tm_year = year;
-	timein.tm_mon = month-1;
-	timein.tm_mday = day-1;
-	timein.tm_hour = hour;
-	timein.tm_min = min;
-	timein.tm_sec = sec;
-	time_t tm = mktime(&timein);
 
-	//time_t tm = time(NULL);
-	
-	tm = tm*1000;
-	tm += micro_sec;
-	
-	return (unsigned long long)tm;
-}
 
 void MarketPrice::OnRtnDepthMarketData(CThostFtdcDepthMarketDataField *data)
 {
@@ -128,7 +106,7 @@ void MarketPrice::OnRtnDepthMarketData(CThostFtdcDepthMarketDataField *data)
 	int min;
 	int sec;
 
-	struct data_type mydata;
+	struct tick_data_type mydata;
 
 	sscanf(data->UpdateTime, "%d:%d:%d", &hour, &min, &sec);
 

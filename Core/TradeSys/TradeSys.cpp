@@ -8,7 +8,7 @@
 //#include "Data_db.h"
 #include "DataInterface.h"
 #include "time.h"
-
+#include "Trader.h"
 #include "data_analys_1.h"
 #include<iostream>
 #include<windows.h>
@@ -18,8 +18,8 @@ static unsigned long long time_convert(int year, int month, int day, int hour, i
 	struct tm timein;
 	timein.tm_year = year;
 	timein.tm_mon = month-1;
-	timein.tm_mday = day-1;
-	timein.tm_hour = hour-1;
+	timein.tm_mday = day;
+	timein.tm_hour = hour;
 	timein.tm_min = min;
 	timein.tm_sec = sec;
 	time_t tm = mktime(&timein);
@@ -41,6 +41,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	string user;
 	string passwd;
 	vector<string> IDs;
+	CtpTraderSpi trader;
 
 	DataInterface data_interface;
 
@@ -58,6 +59,9 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	
 	Data_analys_1(&data_interface);
+
+	//trader.SetConfig(addr.c_str(), broker.c_str(), user.c_str(), passwd.c_str());
+	//trader.StartToTrade();
 
 	MP_hd.WaitForJoin();
 

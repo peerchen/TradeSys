@@ -15,12 +15,26 @@ struct rang_data_type
 	double low;
 	double open_price;
 	double close_price;
-
 	int volume;
+	
+};
+
+struct k_data_type
+{
+	unsigned long long tm;
+	double high;
+	double low;
+	double open_price;
+	double close_price;
+	int volume;
+	int holding;
+	unsigned int ver;
+	char rev[8];
 };
 
 
-struct data_type
+
+struct tick_data_type
 {
 	unsigned long long tm;
 	double last_Price;//current price
@@ -28,13 +42,8 @@ struct data_type
 
 	unsigned int version; //the version of this data type
 	
-	
-	
-	
 	int volume; 
 	
-	
-
 	int open_interest;//hold in hand
 
 	//for history data ,we may just have 1

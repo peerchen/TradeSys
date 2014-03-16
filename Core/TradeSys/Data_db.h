@@ -18,8 +18,15 @@ public:
 
 	int loop_db(int (*pFun)(void *ptr, void * db_data, int length), void * p);
 
+	int  put_batch();
+
+	int  clear_batch();
+	int insert_data_batch(const void * key, int key_size, const void * data, int size);
+
 	leveldb::DB* db;
 private:
+
+	leveldb::WriteBatch batch;
 	
 };
 
