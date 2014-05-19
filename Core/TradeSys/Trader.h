@@ -26,7 +26,7 @@ class CtpTraderSpi : public CThostFtdcTraderSpi
 {
 	
 public:
-	CtpTraderSpi();
+	CtpTraderSpi(const char* addr, const char* brokerid,  const char* investor, const char* passwd);
 	~CtpTraderSpi();
 
 	/***************************All request and response interface************************/
@@ -105,10 +105,10 @@ public:
 
 CThostFtdcTraderApi* pUserApi;
 
-	char FRONT_ADDR[512];		
-	TThostFtdcBrokerIDType	BROKER_ID;
-	TThostFtdcInvestorIDType INVESTOR_ID;
-	TThostFtdcPasswordType	PASSWORD;
+	char m_tradeAddr[512];		
+	TThostFtdcBrokerIDType	m_brokerID;
+	TThostFtdcInvestorIDType m_userID;
+	TThostFtdcPasswordType	m_passwd;
 	char ppInstrumentID [256];
 
 	HANDLE g_hEvent;

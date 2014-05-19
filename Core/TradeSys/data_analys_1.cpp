@@ -7,6 +7,8 @@
 #include <stdio.h>   
 #include "Indicate.h"
 #include "RealTrend_cal.h"
+#include "svm_cal.h"
+#include "Plotshow.h"
 
 
 
@@ -30,6 +32,7 @@ int Data_analys_1(DataInterface * m_interface)
 {
 	std::vector<struct tick_data_type> data;
 	struct rang_data_type data_a;
+	Plotshow show;
 	/*
 	unsigned long long tm_s = time_convert(2014, 1, 27 , 0 , 0, 0, 0);
 	unsigned long long tm_e = time_convert(2014, 1, 27, 0 , 10, 0, 0);
@@ -46,11 +49,18 @@ int Data_analys_1(DataInterface * m_interface)
 
 	int year = 2013;
 	int counter[2] = {0, 0};
-	for(int month = 1; month < 13; month++)
+	for(int month = 3; month < 4; month++)
 	{
 		char filename[32];
 		sprintf(filename, "%04d%02d.txt", year, month);
 		FILE * fp = fopen(filename , "w");
+
+		
+
+		//svm_cal_class svm_pridict;
+
+		//svm_pridict.load_mode("201302.txt.model");
+		//svm_pridict.set_scale("201303.txt.range");
 
 		//sprintf(filename, "%04d%02d_K.txt", year, month);
 		//FILE * fp_K = fopen(filename , "w");
@@ -60,32 +70,93 @@ int Data_analys_1(DataInterface * m_interface)
 		int motion_range[128];
 		int motion_total =0;
 
+
+
 		memset(motion_range, 0x00, sizeof(motion_range));
 
 		for(int day = 0 ; day < 32; day++)
 		{
-			unsigned long long ss = time_convert(year, month, day , 9 , 0, 0, 0);
+			unsigned long long ss = time_convert(year, month, day , 9 , 5, 0, 0);
 			unsigned long long ee = time_convert(year, month, day,  15 , 0, 0, 0);
 			unsigned long long base = ss;
 			struct k_data_type dd;
 
 			Instrument_base_Indicate MACD("ag1406");
 			Instrument_base_Indicate V("ag1406_v");
+			Instrument_base_Indicate MA_5("ma_5");
+			Instrument_base_Indicate MA_10("ma_10");
+			Instrument_base_Indicate MA_20("ma_20");
+			MA_5.Set_MA_para(5);
+			MA_10.Set_MA_para(10);
+			MA_20.Set_MA_para(20);
+			//Instrument_base_Indicate MA_60("ma_60");
 
 			MACD.Set_MACD_para(10,20,9);
 			V.Set_MACD_para(10,20,9);
+			
+			//FILE * showfile = fopen("show.txt", "w");
+			int showflag = 0;		
 
-			
-			
 			for( ;ss < ee; ss += 60*1000 )
 			{
 				if(Data.GetMinData(ss , &dd)>0)
 				{
+
+					showflag = 1;
+
+					rang_data_type r_data;
+					r_data.open_price = dd.open_price;
+					r_data.close_price = dd.close_price;
+					r_data.high = dd.high;
+					r_data.low = dd.low;
+					r_data.volume = dd.volume;
+
+
 					float dif, dem, osc; 
 					float v_dif, v_dem, v_osc;
 					float v = dd.volume;
+					
+					
 					MACD.cal_MACD(dd.close_price, &dif, &dem ,&osc);
 					V.cal_MACD(v, &v_dif, &v_dem, &v_osc);
+
+
+
+					float ma[4];
+					int rr;
+					rr = MA_5.cal_MA(r_data, &ma[0]);
+					if(rr < 0)
+						ma[0] = dd.close_price;
+					rr = MA_10.cal_MA(r_data, &ma[1]);
+					if(rr < 0)
+						ma[1] = ma[0];
+					rr= MA_20.cal_MA(r_data, &ma[2]);
+					if(rr < 0)
+						ma[2] = ma[1];
+
+					std::vector<float> t;
+					t.push_back(dd.open_price);
+					t.push_back(dd.high);
+					t.push_back(dd.low);
+					t.push_back(dd.close_price);
+					show.plot_line(t, "financebars");
+					show.plot_line(ma[0], "lines");
+					show.plot_line(ma[1], "lines");
+					show.plot_line(ma[2], "lines");
+					//show.plot_line(1,dif, "lines");
+					//show.plot_line(1,osc, "lines");
+					//show.plot_line(1,dem, "lines");
+					show.plot_line(2, dd.volume, "impulses");
+					
+
+					show.plot_line(1,v_dif, "lines");
+					show.plot_line(1,v_osc, "lines");
+					show.plot_line(1,v_dem, "lines");
+
+					
+					show.line_end();
+
+					
 
 					struct k_data_type dc;
 #if 0
@@ -113,14 +184,33 @@ int Data_analys_1(DataInterface * m_interface)
 						Rt_ret = -1;
 					}
 #else
-
 					int Rt_ret = Real_trend.cal_Max(dc.close_price);
 #endif
-					if(ss > base+30*60*1000 && ss < ee - 10*60*1000)
+					//svm predict
+					if(0 && ss > base+30*60*1000 && ss < ee - 10*60*1000)
 					{
 						fprintf(fp, "%d ", Rt_ret);
 						fprintf(fp, "1:%f 2:%f 3:%f 4:%f  5:%f 6:%f 7:%f 8:%f\n",dd.close_price, dif, dem, osc, v, v_dif, v_dem, v_osc);
+						std::vector<double> svm_feature;
+						svm_feature.push_back(dd.close_price);
+						svm_feature.push_back(dif);
+						svm_feature.push_back(dem);
+						svm_feature.push_back(osc);
+						svm_feature.push_back(v);
+						svm_feature.push_back(v_dif);
+						svm_feature.push_back(v_dem);
+						svm_feature.push_back(v_osc);
+
+						static int count = 0;
+						//double p = svm_pridict.predict(svm_feature);
+						count++;
+						//if(p!= 0)
+						//{
+						//	printf("%d %f\n", Rt_ret, p);
+						//}
 					}
+					
+					
 
 #if 0
 					if(ss > base+30*60*1000 && ss < ee - 10*60*1000)
@@ -162,6 +252,13 @@ int Data_analys_1(DataInterface * m_interface)
 					//	fflush(fp);
 				}
 			}
+
+			//fclose(showfile);
+			if(showflag)
+			{
+				show.show();
+				//show.show_file("show.txt");
+			}
 		}
 
 		
@@ -173,6 +270,8 @@ int Data_analys_1(DataInterface * m_interface)
 		fprintf(static_fp, "\n");
 
 		fclose(fp);
+
+		//show.show_file(filename);
 		//fclose(fp_K);
 	}
 
