@@ -21,6 +21,11 @@ config_class::config_class(char * file)
 		strcpy(para.name , result);
 		result = strtok(NULL , delims );
 		while( result != NULL ) {
+			if(result[strlen(result)-1] == '\n')
+			{
+				result[strlen(result)-1]  = 0;
+			}
+			//for(int i = 0 ; i < strlen(result); i++)
 			para.value.push_back(result);
 			result = strtok( NULL, delims );
 		}
